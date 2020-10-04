@@ -11,15 +11,18 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.EventListener;
 
 public class Main implements EventListener {
     public static String key;
     static {
         try {
-            Object obj = new JSONParser().parse(new FileReader("key.json"));
+            Object obj = new JSONParser().parse(new FileReader(new File("./src/main/resources/key.json")));
             JSONObject jo = (JSONObject) obj;
             key = (String) jo.get("key");
         } catch (IOException | ParseException ignored) {
@@ -30,8 +33,6 @@ public class Main implements EventListener {
     }
 
     public static void main(String[] args) throws Exception{
-
-
         //Authenticates the bot
         JDA jda = JDABuilder.createDefault(key).build();
 
@@ -60,20 +61,50 @@ class Ping extends ListenerAdapter {
     }
 }
 class Reaction extends ListenerAdapter {
-    static String messageId;
-    public void onMessageReceived(MessageReceivedEvent event){
-        String channelId = event.getChannel().getId();
-        if (channelId.equals("761634429210722344")) {
-            messageId = event.getMessageId();
+    private static String messageId;
+    static {
+        try {
+            JSONObject MessageIdJson = (JSONObject) new JSONParser().parse(new FileReader(new File("./src/main/resources/messageId.json")));
+            messageId = (String) MessageIdJson.get("id");
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
         }
     }
+
+
+    public void onMessageReceived(MessageReceivedEvent event){
+
+        try {
+            String channelId = event.getChannel().getId();
+            if (channelId.equals("761634429210722344")) {
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("id", messageId);
+                Files.write(Paths.get("./src/main/resources/messageId.json"), jsonObj.toJSONString().getBytes());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
-        if (event.getMessageId().equals(messageId)){
-            String emoteId = event.getReactionEmote().getName();
-            String userName = event.getUser().getName();
-            TextChannel textChannel = event.getGuild().getTextChannelById("761629744356655125");
-            User user = User.fromId("206872418428518403");
-            textChannel.sendMessage(user.getAsMention() + " " + userName + " has reacted with the emote: " + emoteId).queue();
+        try {
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse()
+            String emote = event.getReactionEmote().getName();
+            if (event.getMessageId().equals(messageId) /*&& emote.equals("YEP")*/) {
+                String userId = event.getUserId();
+                String userName = event.getUser().getName();
+                TextChannel textChannel = event.getGuild().getTextChannelById("761629744356655125");
+                User user = User.fromId("206872418428518403");
+                textChannel.sendMessage(user.getAsMention() + " " + userName + " has reacted with the emote: " + emote).queue();
+
+
+                Files.write(Paths.get("./src/main/resources/list.json"), jsonObj.toJSONString().getBytes());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 }
