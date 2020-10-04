@@ -2,7 +2,10 @@ package xyz.norakthes;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -33,6 +36,7 @@ public class Main implements EventListener {
         JDA jda = JDABuilder.createDefault(key).build();
 
         jda.addEventListener(new Ping());
+        jda.addEventListener(new Reaction());
     }
 
 
@@ -41,18 +45,35 @@ public class Main implements EventListener {
 
 }
 class Ping extends ListenerAdapter {
-    public  void onMessageReceived(MessageReceivedEvent event){
-        switch (event.getMessage().getContentRaw()){
+    public void onMessageReceived(MessageReceivedEvent event) {
+        switch (event.getMessage().getContentRaw()) {
             case "l!ping":
                 event.getChannel().sendMessage("Pong! \uD83C\uDFD3").queue();
                 break;
             case "bruh":
-                if (!event.getAuthor().isBot()){
+                if (!event.getAuthor().isBot()) {
                     event.getChannel().sendMessage("bruh").queue();
 
                 }
                 break;
-
+        }
+    }
+}
+class Reaction extends ListenerAdapter {
+    static String messageId;
+    public void onMessageReceived(MessageReceivedEvent event){
+        String channelId = event.getChannel().getId();
+        if (channelId.equals("761634429210722344")) {
+            messageId = event.getMessageId();
+        }
+    }
+    public void onMessageReactionAdd(MessageReactionAddEvent event) {
+        if (event.getMessageId().equals(messageId)){
+            String emoteId = event.getReactionEmote().getName();
+            String userName = event.getUser().getName();
+            TextChannel textChannel = event.getGuild().getTextChannelById("761629744356655125");
+            User user = User.fromId("206872418428518403");
+            textChannel.sendMessage(user.getAsMention() + " " + userName + " has reacted with the emote: " + emoteId).queue();
         }
     }
 }
