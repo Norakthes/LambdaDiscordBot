@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -41,8 +40,8 @@ public class Main implements EventListener {
         jda.addEventListener(new Ping());
         jda.addEventListener(new Reaction());
 
-        //Activity
-        jda.getPresence().setActivity(Activity.playing("shit bot lol die"));
+//        //Activity
+//        jda.getPresence().setActivity(Activity.playing("shit bot lol die"));
     }
 
 
@@ -109,9 +108,9 @@ class Reaction extends ListenerAdapter {
                     String[] userList = new String[jsonArray.size()];
                     MessageBuilder message = new MessageBuilder();
                     message.append("Attendee list:\n");
-                    for (int i = 1; i<=jsonArray.size(); i++) {
+                    for (int i = 0; i<=jsonArray.size() - 1; i++) {
                         userList[i] = jsonArray.get(i).toString();
-                        if (i == jsonArray.size()) {
+                        if (i == jsonArray.size() - 1) {
                             message.append(userList[i]);
                         }
                         else {
